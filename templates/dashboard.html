@@ -7,7 +7,15 @@
 <body>
 
 <div class="container">
-    <h2>🎁 Welcome to Secret Santa 🎄</h2>
+    <h2>🎁 Welcome, {{ name }} 🎄</h2>
+
+    <p style="margin-bottom: 20px;">
+        {% if days_left > 0 %}
+            🎄 Gift exchange in <strong>{{ days_left }}</strong> days
+        {% else %}
+            🎁 It’s gift day!
+        {% endif %}
+    </p>
 
     <a href="/reveal"><button>Find out who you are gifting</button></a>
     <br><br>
@@ -15,6 +23,19 @@
     <br><br>
     <a href="/logout">Logout</a>
 </div>
+
+<script>
+    const snowflakes = ["❄", "❅", "❆"];
+    for (let i = 0; i < 20; i++) {
+        const snow = document.createElement("div");
+        snow.className = "snowflake";
+        snow.innerText = snowflakes[Math.floor(Math.random() * snowflakes.length)];
+        snow.style.left = Math.random() * 100 + "vw";
+        snow.style.animationDuration = (5 + Math.random() * 5) + "s";
+        snow.style.opacity = Math.random();
+        document.body.appendChild(snow);
+    }
+</script>
 
 </body>
 </html>
