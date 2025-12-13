@@ -9,13 +9,22 @@
 <div class="container">
     <h2>📝 Your Wishlist</h2>
 
+    <p style="font-size: 14px; margin-bottom: 15px;">
+        Add gift ideas to help your Secret Santa 🎁  
+        <br>(One item per line)
+    </p>
+
     <form method="POST">
         <textarea name="wishlist" rows="8"
-                  placeholder="One item per line">{{ wishlist }}</textarea>
+                  placeholder="Example:
+Chocolate box
+Book
+Small decor item">{{ wishlist }}</textarea>
+
         <button type="submit">Save Wishlist</button>
     </form>
 
-    <a href="/dashboard">Back to Dashboard</a>
+    <a href="/dashboard">← Back to Dashboard</a>
 </div>
 
 </body>
