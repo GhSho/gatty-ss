@@ -1,24 +1,24 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 import json
 import os
+import random
 
 app = Flask(__name__)
-app.secret_key = "super_secret_santa_key"  # change before deployment
+app.secret_key = "super_secret_santa_key_change_this"
+
+
+# ----------------------------
+# File paths
+# ----------------------------
+
+USERS_PATH = "users.json"
+ASSIGNMENTS_PATH = "data/assignments.json"
+WISHLISTS_PATH = "data/wishlists.json"
 
 
 # ----------------------------
 # Utility functions
 # ----------------------------
-
-def load_valid_ids():
-    ids = set()
-    with open("valid_ids.txt", "r") as f:
-        for line in f:
-            line = line.strip()
-            if line:
-                ids.add(line)
-    return ids
-
 
 def load_json(path, default):
     if not os.path.exists(path):
@@ -32,10 +32,12 @@ def save_json(path, data):
         json.dump(data, f, indent=4)
 
 
-# Load data
-VALID_IDS = load_valid_ids()
-ASSIGNMENTS_PATH = "data/assignments.json"
-WISHLISTS_PATH = "data/wishlists.json"
+def load_users():
+    with open(USERS_PATH, "r") as f:
+        return json.load(f)
+
+
+USERS = load_users()
 
 
 # ----------------------------
@@ -48,12 +50,15 @@ def login():
 
     if request.method == "POST":
         user_id = request.form.get("user_id", "").strip()
+        pin = request.form.get("pin", "").strip()
 
-        if user_id in VALID_IDS:
+        user = USERS.get(user_id)
+
+        if user and user["pin"] == pin:
             session["user_id"] = user_id
             return redirect(url_for("dashboard"))
         else:
-            error = "Invalid Secret ID. Please try again."
+            error = "Invalid ID or PIN."
 
     return render_template("login.html", error=error)
 
@@ -79,15 +84,15 @@ def reveal():
     recipient_id = assignments.get(user_id)
 
     if not recipient_id:
-        recipient_name = "Not assigned yet"
+        recipient = "Not assigned yet"
         wishlist = []
     else:
-        recipient_name = recipient_id  # can later map ID → display name
+        recipient = recipient_id
         wishlist = wishlists.get(recipient_id, [])
 
     return render_template(
         "reveal.html",
-        recipient=recipient_name,
+        recipient=recipient,
         wishlist=wishlist
     )
 
@@ -107,13 +112,10 @@ def wishlist():
         save_json(WISHLISTS_PATH, wishlists)
         return redirect(url_for("dashboard"))
 
-    current_wishlist = wishlists.get(user_id, [])
-    wishlist_text = "\n".join(current_wishlist)
+    current = wishlists.get(user_id, [])
+    wishlist_text = "\n".join(current)
 
-    return render_template(
-        "wishlist.html",
-        wishlist=wishlist_text
-    )
+    return render_template("wishlist.html", wishlist=wishlist_text)
 
 
 @app.route("/logout")
@@ -123,8 +125,51 @@ def logout():
 
 
 # ----------------------------
-# Run app
+# ADMIN: Generate assignments
+# ----------------------------
+
+@app.route("/admin/generate")
+def generate_assignments():
+    """
+    Generates Secret Santa assignments with rules:
+    - No one gets themselves
+    - No one gifts within the same family
+    """
+
+    users = USERS
+    user_ids = list(users.keys())
+
+    max_attempts = 1000
+
+    for _ in range(max_attempts):
+        shuffled = user_ids[:]
+        random.shuffle(shuffled)
+
+        assignments = {}
+        valid = True
+
+        for giver, receiver in zip(user_ids, shuffled):
+            if giver == receiver:
+                valid = False
+                break
+            if users[giver]["family"] == users[receiver]["family"]:
+                valid = False
+                break
+            assignments[giver] = receiver
+
+        if valid:
+            save_json(ASSIGNMENTS_PATH, assignments)
+            return "✅ Secret Santa assignments generated successfully."
+
+    return "❌ Could not generate valid assignments. Check family groups."
+
+
+# ----------------------------
+# Run locally only
 # ----------------------------
 
 if __name__ == "__main__":
     app.run()
+
+ 
+
