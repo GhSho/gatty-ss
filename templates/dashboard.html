@@ -2,12 +2,19 @@
 <html>
 <head>
     <title>Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h2>Welcome to Secret Santa 🎁</h2>
 
-    <a href="/reveal">Find out who you are gifting</a><br><br>
-    <a href="/wishlist">Make / Edit your Wishlist</a><br><br>
+<div class="container">
+    <h2>🎁 Welcome to Secret Santa 🎄</h2>
+
+    <a href="/reveal"><button>Find out who you are gifting</button></a>
+    <br><br>
+    <a href="/wishlist"><button>Make / Edit your Wishlist</button></a>
+    <br><br>
     <a href="/logout">Logout</a>
+</div>
+
 </body>
 </html>
