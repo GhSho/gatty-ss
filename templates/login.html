@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Secret Santa Login</title>
+</head>
+<body>
+    <h1>🎄 Secret Santa 🎁</h1>
+
+    {% if error %}
+        <p style="color:red;">{{ error }}</p>
+    {% endif %}
+
+    <form method="POST">
+        <input type="text" name="user_id" placeholder="Enter your Secret ID" required>
+        <button type="submit">Login</button>
+    </form>
+</body>
+</html>
