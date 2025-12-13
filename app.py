@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session
 import json
 import os
 import random
+from datetime import date
 
 app = Flask(__name__)
 app.secret_key = "super_secret_santa_key_change_this"
@@ -17,7 +18,7 @@ WISHLISTS_PATH = "data/wishlists.json"
 
 
 # ----------------------------
-# Utility functions
+# Helpers
 # ----------------------------
 
 def load_json(path, default):
@@ -38,6 +39,18 @@ def load_users():
 
 
 USERS = load_users()
+
+
+# ----------------------------
+# Countdown config
+# ----------------------------
+
+GIFT_DAY = date(2025, 12, 25)  # change if needed
+
+
+def days_left():
+    today = date.today()
+    return max((GIFT_DAY - today).days, 0)
 
 
 # ----------------------------
@@ -68,7 +81,14 @@ def dashboard():
     if "user_id" not in session:
         return redirect(url_for("login"))
 
-    return render_template("dashboard.html")
+    user_id = session["user_id"]
+    days = days_left()
+
+    return render_template(
+        "dashboard.html",
+        name=user_id,
+        days_left=days
+    )
 
 
 @app.route("/reveal")
@@ -125,51 +145,38 @@ def logout():
 
 
 # ----------------------------
-# ADMIN: Generate assignments
+# ADMIN (hidden)
 # ----------------------------
 
-@app.route("/admin/generate")
-def generate_assignments():
+@app.route("/admin")
+def admin():
+    assignments = load_json(ASSIGNMENTS_PATH, {})
+    wishlists = load_json(WISHLISTS_PATH, {})
+
+    total_users = len(USERS)
+    assigned = len(assignments)
+    wishlists_filled = len(wishlists)
+
+    return f"""
+    <h2>Admin Panel</h2>
+    <p>Total users: {total_users}</p>
+    <p>Assignments generated: {assigned}</p>
+    <p>Wishlists filled: {wishlists_filled}</p>
+    <br>
+    <a href="/admin/reset">Reset for next year</a>
     """
-    Generates Secret Santa assignments with rules:
-    - No one gets themselves
-    - No one gifts within the same family
-    """
 
-    users = USERS
-    user_ids = list(users.keys())
 
-    max_attempts = 1000
-
-    for _ in range(max_attempts):
-        shuffled = user_ids[:]
-        random.shuffle(shuffled)
-
-        assignments = {}
-        valid = True
-
-        for giver, receiver in zip(user_ids, shuffled):
-            if giver == receiver:
-                valid = False
-                break
-            if users[giver]["family"] == users[receiver]["family"]:
-                valid = False
-                break
-            assignments[giver] = receiver
-
-        if valid:
-            save_json(ASSIGNMENTS_PATH, assignments)
-            return "✅ Secret Santa assignments generated successfully."
-
-    return "❌ Could not generate valid assignments. Check family groups."
+@app.route("/admin/reset")
+def admin_reset():
+    save_json(ASSIGNMENTS_PATH, {})
+    save_json(WISHLISTS_PATH, {})
+    return "✅ Reset complete. Ready for next year."
 
 
 # ----------------------------
-# Run locally only
+# Run locally
 # ----------------------------
 
 if __name__ == "__main__":
     app.run()
-
- 
-
