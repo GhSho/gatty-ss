@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 import json
 import os
-import random
 from datetime import date
 
 app = Flask(__name__)
@@ -42,10 +41,10 @@ USERS = load_users()
 
 
 # ----------------------------
-# Countdown config
+# Gift day config (31st)
 # ----------------------------
 
-GIFT_DAY = date(2025, 12, 25)  # change if needed
+GIFT_DAY = date(date.today().year, date.today().month, 31)
 
 
 def days_left():
@@ -82,12 +81,11 @@ def dashboard():
         return redirect(url_for("login"))
 
     user_id = session["user_id"]
-    days = days_left()
 
     return render_template(
         "dashboard.html",
         name=user_id,
-        days_left=days
+        days_left=days_left()
     )
 
 
@@ -153,15 +151,11 @@ def admin():
     assignments = load_json(ASSIGNMENTS_PATH, {})
     wishlists = load_json(WISHLISTS_PATH, {})
 
-    total_users = len(USERS)
-    assigned = len(assignments)
-    wishlists_filled = len(wishlists)
-
     return f"""
     <h2>Admin Panel</h2>
-    <p>Total users: {total_users}</p>
-    <p>Assignments generated: {assigned}</p>
-    <p>Wishlists filled: {wishlists_filled}</p>
+    <p>Total users: {len(USERS)}</p>
+    <p>Assignments generated: {len(assignments)}</p>
+    <p>Wishlists filled: {len(wishlists)}</p>
     <br>
     <a href="/admin/reset">Reset for next year</a>
     """
