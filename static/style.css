@@ -66,3 +66,20 @@ a:hover {
     text-align: left;
     margin-top: 15px;
 }
+
+/* Snow animation */
+.snowflake {
+    position: fixed;
+    top: -10px;
+    color: #ffffff;
+    font-size: 18px;
+    pointer-events: none;
+    animation: fall linear infinite;
+}
+
+@keyframes fall {
+    to {
+        transform: translateY(110vh);
+    }
+}
+
