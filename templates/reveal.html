@@ -12,7 +12,7 @@
     <p>You are gifting:</p>
     <h3>{{ recipient }}</h3>
 
-    <h3>Wishlist</h3>
+    <h3 style="margin-top: 25px;">Wishlist</h3>
 
     {% if wishlist %}
         <ul class="list">
@@ -21,10 +21,12 @@
             {% endfor %}
         </ul>
     {% else %}
-        <p>No wishlist added yet.</p>
+        <p style="font-size: 14px;">
+            This person hasn’t added a wishlist yet.
+        </p>
     {% endif %}
 
-    <a href="/dashboard">Back to Dashboard</a>
+    <a href="/dashboard">← Back to Dashboard</a>
 </div>
 
 </body>
