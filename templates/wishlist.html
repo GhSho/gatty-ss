@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Your Wishlist</title>
+</head>
+<body>
+    <h2>📝 Your Wishlist</h2>
+
+    <form method="POST">
+        <textarea name="wishlist" rows="8" cols="40"
+                  placeholder="One item per line">{{ wishlist }}</textarea><br><br>
+        <button type="submit">Save Wishlist</button>
+    </form>
+
+    <br>
+    <a href="/dashboard">Back</a>
+</body>
+</html>
