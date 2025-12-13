@@ -21,6 +21,19 @@
     </form>
 </div>
 
+<script>
+    const snowflakes = ["❄", "❅", "❆"];
+    for (let i = 0; i < 20; i++) {
+        const snow = document.createElement("div");
+        snow.className = "snowflake";
+        snow.innerText = snowflakes[Math.floor(Math.random() * snowflakes.length)];
+        snow.style.left = Math.random() * 100 + "vw";
+        snow.style.animationDuration = (5 + Math.random() * 5) + "s";
+        snow.style.opacity = Math.random();
+        document.body.appendChild(snow);
+    }
+</script>
+
 </body>
 </html>
 
