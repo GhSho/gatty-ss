@@ -41,11 +41,10 @@ USERS = load_users()
 
 
 # ----------------------------
-# Gift day config (31st)
+# Gift day (31st)
 # ----------------------------
 
 GIFT_DAY = date(date.today().year, date.today().month, 31)
-
 
 def days_left():
     today = date.today()
@@ -80,11 +79,9 @@ def dashboard():
     if "user_id" not in session:
         return redirect(url_for("login"))
 
-    user_id = session["user_id"]
-
     return render_template(
         "dashboard.html",
-        name=user_id,
+        name=session["user_id"],
         days_left=days_left()
     )
 
@@ -94,23 +91,16 @@ def reveal():
     if "user_id" not in session:
         return redirect(url_for("login"))
 
-    user_id = session["user_id"]
-
     assignments = load_json(ASSIGNMENTS_PATH, {})
     wishlists = load_json(WISHLISTS_PATH, {})
 
-    recipient_id = assignments.get(user_id)
-
-    if not recipient_id:
-        recipient = "Not assigned yet"
-        wishlist = []
-    else:
-        recipient = recipient_id
-        wishlist = wishlists.get(recipient_id, [])
+    user_id = session["user_id"]
+    recipient = assignments.get(user_id)
+    wishlist = wishlists.get(recipient, []) if recipient else []
 
     return render_template(
         "reveal.html",
-        recipient=recipient,
+        recipient=recipient or "Not assigned yet",
         wishlist=wishlist
     )
 
@@ -120,20 +110,19 @@ def wishlist():
     if "user_id" not in session:
         return redirect(url_for("login"))
 
-    user_id = session["user_id"]
     wishlists = load_json(WISHLISTS_PATH, {})
+    user_id = session["user_id"]
 
     if request.method == "POST":
         items = request.form.get("wishlist", "")
-        wishlist_items = [i.strip() for i in items.split("\n") if i.strip()]
-        wishlists[user_id] = wishlist_items
+        wishlists[user_id] = [i.strip() for i in items.split("\n") if i.strip()]
         save_json(WISHLISTS_PATH, wishlists)
         return redirect(url_for("dashboard"))
 
-    current = wishlists.get(user_id, [])
-    wishlist_text = "\n".join(current)
-
-    return render_template("wishlist.html", wishlist=wishlist_text)
+    return render_template(
+        "wishlist.html",
+        wishlist="\n".join(wishlists.get(user_id, []))
+    )
 
 
 @app.route("/logout")
@@ -143,7 +132,7 @@ def logout():
 
 
 # ----------------------------
-# ADMIN (hidden)
+# ADMIN (SAFE)
 # ----------------------------
 
 @app.route("/admin")
