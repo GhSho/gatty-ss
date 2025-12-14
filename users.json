@@ -40,6 +40,10 @@
     "pin": "9134",
     "family": "B"
   },
+  "vaishu": {
+    "pin": "5684",
+    "family": "B"
+  },
 
   "hemi": {
     "pin": "2685",
