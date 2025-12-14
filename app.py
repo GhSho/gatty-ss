@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 import json
 import os
+import random
 from datetime import date
 
 app = Flask(__name__)
@@ -132,7 +133,61 @@ def logout():
 
 
 # ----------------------------
-# ADMIN (SAFE)
+# ADMIN: Generate (with confirmation)
+# ----------------------------
+
+@app.route("/admin/generate", methods=["GET", "POST"])
+def admin_generate():
+    assignments = load_json(ASSIGNMENTS_PATH, {})
+    already_exists = bool(assignments)
+
+    if request.method == "POST":
+        users = USERS
+        user_ids = list(users.keys())
+
+        for _ in range(1000):
+            shuffled = user_ids[:]
+            random.shuffle(shuffled)
+
+            new_assignments = {}
+            valid = True
+
+            for giver, receiver in zip(user_ids, shuffled):
+                if giver == receiver:
+                    valid = False
+                    break
+                if users[giver]["family"] == users[receiver]["family"]:
+                    valid = False
+                    break
+                new_assignments[giver] = receiver
+
+            if valid:
+                save_json(ASSIGNMENTS_PATH, new_assignments)
+                return "✅ Assignments generated successfully."
+
+        return "❌ Could not generate valid assignments."
+
+    # GET request → confirmation page
+    if already_exists:
+        message = "⚠️ Assignments already exist. Are you sure you want to REGENERATE them?"
+        button = "Yes, regenerate"
+    else:
+        message = "⚠️ Are you sure you want to generate Secret Santa assignments?"
+        button = "Yes, generate"
+
+    return f"""
+    <h2>Admin – Generate Assignments</h2>
+    <p>{message}</p>
+    <form method="POST">
+        <button type="submit">{button}</button>
+    </form>
+    <br>
+    <a href="/admin">Cancel</a>
+    """
+
+
+# ----------------------------
+# ADMIN: Status + Reset
 # ----------------------------
 
 @app.route("/admin")
@@ -146,6 +201,7 @@ def admin():
     <p>Assignments generated: {len(assignments)}</p>
     <p>Wishlists filled: {len(wishlists)}</p>
     <br>
+    <a href="/admin/generate">Generate / Regenerate Assignments</a><br><br>
     <a href="/admin/reset">Reset for next year</a>
     """
 
