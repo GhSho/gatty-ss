@@ -31,7 +31,6 @@
   "sapna": {
     "pin": "8521",
     "family": "B"
-  
   },
   "lalitha": {
     "pin": "9134",
@@ -71,6 +70,10 @@
     "pin": "3706",
     "family": "D"
   },
+  "shakuntala": {
+    "pin": "4583",
+    "family": "D"
+  },
 
   "charmee": {
     "pin": "5178",
@@ -85,5 +88,3 @@
     "family": "E"
   }
 }
-
- 
